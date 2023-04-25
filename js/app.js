@@ -8,7 +8,6 @@ createApp({
                 username: null,
                 phone: null
             },
-            lo
         }
     },
     methods: {
