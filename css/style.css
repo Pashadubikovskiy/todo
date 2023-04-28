@@ -99,6 +99,10 @@ header {
   opacity: 0.8;
 }
 
+.user__info {
+  color: #fff;
+}
+
 footer {
   min-height: 270px;
   background-color: #474747;

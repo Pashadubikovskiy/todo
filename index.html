@@ -18,17 +18,17 @@
     </header>
     <div id="app">
         <div class="container">
-            <div class="modal">
+            <div class="modal" v-if="!isLogged">
                 <div class="modal__header">
                     {{ message }}
                 </div>
                 <div class="modal__body">
                     <div class="modal__description">
-                        {{ info }}
+                        {{ message }}
                     </div>
                     <form @submit="checkFields">
                         <input class="modal__input modal__input--username" type="text" placeholder="Username" pattern="[a-zA-Z]+" required v-model="info.username"/>
-                        <input class="modal__input modal__input--phone" type="text" placeholder="Phone Number" pattern="[0-9_.-]+" required v-model="info.phone"/>
+                        <input class="modal__input modal__input--phone" type="text" placeholder="Phone Number" pattern="[0-9_.-() ]+" required v-model="info.phone"/>
 
                         <button class="modal__btn" type="submit">
                             Register
@@ -37,12 +37,70 @@
                 </div>
 
             </div>
+            <div v-else class="user">
+                <ul class="user__info">
+                    <li v-for="(value, name, index) in userInfo" :key="`${name}-${index}`">
+                        {{name}}:
+                        <ul v-if="typeof value === 'object'">
+                            <li v-for="(val, nam, id) in  value" :key="`${nam}-${id}`">
+                                {{nam}}:
+                                <ul v-if="typeof val === 'object'">
+                                    <li v-for="(v, n, i) in  val" :key="`${v}-${i}`">
+                                        {{n}}:{{v}}
+                                    </li>
+                                </ul>
+                                <template v-else>{{val}}</template>
+                            </li>
+                        </ul>
+                        <template v-else>{{value}}</template>
+                    </li>
+                </ul>
+
+                <div class="user__todo">
+                    <h1>Filter</h1>
+                    <form>
+                        <select name="status" id="status" v-model="filterRules.status" @change="filterAll()">
+                            <option value="all">All</option>
+                            <option value="completed">Completed</option>
+                            <option value="uncompleted">Uncompleted</option>
+                            <option value="favorites">Favorites</option>
+                        </select>
+                        <select name="users" id="users" v-model="filterRules.userId" @change="filterAll()">
+                            <option value="0">All users</option>
+                            <option
+                                    v-for="userId in usersId"
+                                    :value="userId"
+                                    :key="userId"
+                            >
+                                {{userId}}
+                            </option>
+                        </select>
+                        <input type="text" placeholder="Search..." v-model="filterTitle" @keyup="filterAll()">
+                    </form>
+                    <h2>
+                        Create todo
+                    </h2>
+                    <form>
+                        <input type="number" placeholder="User Id">
+                        <input type="text" placeholder="Title">
+                        <button type="submit">Add</button>
+                    </form>
+                    <ul>
+                        <li v-for="todoItem in filteredTodoList" :key="todoItem.id">
+                            <input type="checkbox" :checked="todoItem.completed">
+                            {{todoItem.title}}
+
+                            <button>Fav</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
     <footer>
         
     </footer>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
