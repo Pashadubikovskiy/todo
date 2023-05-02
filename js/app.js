@@ -8,32 +8,71 @@ new Vue({
                 phone: '1-463-123-4447'
             },
             isLogged: false,
-            userInfo: null,
-            todoList: null,
+            userInfo: {},
+            todoList: [],
             usersId: null,
             filterRules: {
                 status: 'all',
                 userId: 0,
                 filterTitle: '',
             },
-            filteredTodoList: this.todoList,
+            toDo: {
+                userId: null,
+                title: '',
+            },
+            favoritesList: []
         }
     },
+    computed: {
+        filteredTodoList() {
+            let toDoList = [...this.todoList]
+            if(this.filterRules.status === 'completed') {
+                toDoList = toDoList.filter((item) => item.completed)
+            }
+            if(this.filterRules.status === 'uncompleted') {
+                toDoList = toDoList.filter((item) => !item.completed)
+            }
+            if(this.filterRules.status === 'favorites') {
+                toDoList = toDoList.filter((item) => this.favoritesList.includes(item.id))
+            }
+            if(!!+this.filterRules.userId) {
+                toDoList = toDoList.filter((item) => item.userId === this.filterRules.userId)
+            }
+            if(!!this.filterRules.filterTitle) {
+                toDoList = toDoList.filter((item) => item.title.toLowerCase().includes(this.filterRules.filterTitle.toLowerCase()))
+            }
+
+            return toDoList
+        }
+    },
+    mounted() {
+        this.favoritesList = JSON.parse(localStorage.getItem('favorites')) || []
+    },
     methods: {
+        updateToDoItem: function (id) {
+            const indexItem = this.todoList.findIndex((item) => item.id === id)
+            this.todoList[indexItem].completed = !this.todoList[indexItem].completed
+        },
         getTodo: function () {
             const vm = this;
-            fetch('https://jsonplaceholder.typicode.com/todos', {cache: "no-cache"})
+            fetch('https://jsonplaceholder.typicode.com/todos')
                 .then((response) => response.json())
                 .then((todos) => {
                     vm.todoList = todos;
-                    vm.filteredTodoList = vm.todoList;
                     vm.usersId = [...new Set(todos.map(point => point.userId))]
                 });
         },
-        checkFields: function(e) {
-            e.preventDefault();
+        updateTodo: function(todo) {
             const vm = this;
-            fetch('https://jsonplaceholder.typicode.com/users', {cache: "no-cache"})
+            fetch('https://jsonplaceholder.typicode.com/todos')
+                .then((response) => response.json())
+                .then(() => {
+                    vm.todoList = [todo, ...vm.todoList];
+                });
+        },
+        checkFields: function() {
+            const vm = this;
+            fetch('https://jsonplaceholder.typicode.com/users')
                 .then((response) => response.json())
                 .then((users) => {
                     let obj;
@@ -50,33 +89,22 @@ new Vue({
                     alert('error');
                 });
         },
-        filterAll: function () {
-            this.filteredTodoList = this.filteredTodoList.filter((item) => {
-                item.some(cat => ((cat.completed === this.status) && cat.title.includes(this.filterTitle) && cat.userId === this.userId))
-            })
+        updateFavorites: function (id) {
+            if(this.favoritesList.includes(id)) {
+                this.favoritesList = this.favoritesList.filter((item) => item !== id)
+            } else {
+                this.favoritesList = [...this.favoritesList, id]
+            }
+            localStorage.setItem('favorites', JSON.stringify(this.favoritesList));
         },
-        filterByStatus: function () {
-            this.filteredTodoList = this.filteredTodoList.filter((item) => {
-                if (this.filterStatus === 'all') return item;
-                if (this.filterStatus === 'completed') {
-                   return item.completed === true;
-                }
-                if (this.filterStatus === 'uncompleted') {
-                   return item.completed === false;
-                }
-            })
-        },
-        filterByUser: function () {
-            this.filteredTodoList = this.filteredTodoList.filter((item) => {
-                if (!this.filterUserId) return item;
-                return item.userId === this.filterUserId;
-            })
-        },
-        filterByTitle: function () {
-            this.filteredTodoList = this.filteredTodoList.filter((item) => {
-                if (!this.filterTitle) return item;
-                return item.title.includes(this.filterTitle);
-            })
+        addToDo: function () {
+            const toDo = {
+                userId: +this.toDo.userId,
+                id: this.todoList.length + 1,
+                title: this.toDo.title,
+                completed: false
+            }
+            this.updateTodo(toDo)
         }
     }
 })

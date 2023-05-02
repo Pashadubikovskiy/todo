@@ -14,7 +14,7 @@
 </head>
 <body>
     <header>
-        
+
     </header>
     <div id="app">
         <div class="container">
@@ -26,20 +26,19 @@
                     <div class="modal__description">
                         {{ message }}
                     </div>
-                    <form @submit="checkFields">
+                    <form @submit.prevent="checkFields">
                         <input class="modal__input modal__input--username" type="text" placeholder="Username" pattern="[a-zA-Z]+" required v-model="info.username"/>
-                        <input class="modal__input modal__input--phone" type="text" placeholder="Phone Number" pattern="[0-9_.-() ]+" required v-model="info.phone"/>
+                        <input class="modal__input modal__input--phone" type="text" placeholder="Phone Number" pattern="[0-9._-()]+" required v-model="info.phone"/>
 
                         <button class="modal__btn" type="submit">
                             Register
                         </button>
                     </form>
                 </div>
-
             </div>
             <div v-else class="user">
-                <ul class="user__info">
-                    <li v-for="(value, name, index) in userInfo" :key="`${name}-${index}`">
+                <ul class="user__info user-info">
+                    <li class="user-info__item user-info-item" v-for="(value, name, index) in userInfo" :key="`${name}-${index}`">
                         {{name}}:
                         <ul v-if="typeof value === 'object'">
                             <li v-for="(val, nam, id) in  value" :key="`${nam}-${id}`">
@@ -56,16 +55,24 @@
                     </li>
                 </ul>
 
-                <div class="user__todo">
-                    <h1>Filter</h1>
-                    <form>
-                        <select name="status" id="status" v-model="filterRules.status" @change="filterAll()">
+                <div class="user__todo todo">
+                    <div class="todo__new">
+                        <h2 class="todo__title">Create todo</h2>
+                        <form class="todo__form todo__form--new" @submit.prevent="addToDo">
+                            <input class="todo__input" type="number" placeholder="User Id" min="1" max="10" step="1" required v-model="toDo.userId">
+                            <input class="todo__input" type="text" placeholder="Title" required v-model="toDo.title">
+                            <button class="todo__button" type="submit">Add</button>
+                        </form>
+                    </div>
+                    <h2 class="todo__title">Filter</h2>
+                    <form class="todo__form">
+                        <select class="todo__select" name="status" id="status" v-model="filterRules.status">
                             <option value="all">All</option>
                             <option value="completed">Completed</option>
                             <option value="uncompleted">Uncompleted</option>
                             <option value="favorites">Favorites</option>
                         </select>
-                        <select name="users" id="users" v-model="filterRules.userId" @change="filterAll()">
+                        <select class="todo__select" name="users" id="users" v-model="filterRules.userId">
                             <option value="0">All users</option>
                             <option
                                     v-for="userId in usersId"
@@ -75,22 +82,15 @@
                                 {{userId}}
                             </option>
                         </select>
-                        <input type="text" placeholder="Search..." v-model="filterTitle" @keyup="filterAll()">
+                        <input class="todo__input" type="text" placeholder="Search..." v-model="filterRules.filterTitle">
                     </form>
-                    <h2>
-                        Create todo
-                    </h2>
-                    <form>
-                        <input type="number" placeholder="User Id">
-                        <input type="text" placeholder="Title">
-                        <button type="submit">Add</button>
-                    </form>
-                    <ul>
-                        <li v-for="todoItem in filteredTodoList" :key="todoItem.id">
-                            <input type="checkbox" :checked="todoItem.completed">
-                            {{todoItem.title}}
-
-                            <button>Fav</button>
+                    <ul class="todo__list todo-list">
+                        <li class="todo-list__item todo-list-item" v-for="todoItem in filteredTodoList" :key="todoItem.id">
+                            <label class="todo-list-item__checkbox" :class="{'todo-list-item__checkbox--checked' : todoItem.completed}" >
+                                <input type="checkbox" :checked="todoItem.completed" @change="updateToDoItem(todoItem.id)">
+                            </label>
+                            <span class="todo-list-item__label">{{todoItem.title}}</span>
+                            <button class="todo-list-item__button" :class="{'todo-list-item__button--active' : favoritesList.includes(todoItem.id)}" @click="updateFavorites(todoItem.id)">Fav</button>
                         </li>
                     </ul>
                 </div>
@@ -98,7 +98,7 @@
         </div>
     </div>
     <footer>
-        
+
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
     <script src="js/app.js"></script>
