@@ -28,7 +28,7 @@
                     </div>
                     <form @submit.prevent="checkFields">
                         <input class="modal__input modal__input--username" type="text" placeholder="Username" pattern="[a-zA-Z]+" required v-model="info.username"/>
-                        <input class="modal__input modal__input--phone" type="text" placeholder="Phone Number" pattern="[0-9._-()]+" required v-model="info.phone"/>
+                        <input class="modal__input modal__input--phone" type="text" placeholder="Phone Number" pattern="[0-9._()-]+" required v-model="info.phone"/>
 
                         <button class="modal__btn" type="submit">
                             Register
